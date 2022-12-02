@@ -1,5 +1,8 @@
 use anyhow::Result;
-use std::{fs::File, io::{BufReader, self}};
+use std::{
+    fs::File,
+    io::{self, BufReader},
+};
 
 fn main() -> Result<()> {
     let file = File::open("/home/siws/random/advent-of-code-2022/day2/input")?;
@@ -18,20 +21,20 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 enum Shape {
     Rock,
     Paper,
-    Scissors
+    Scissors,
 }
 
 impl Shape {
     fn new(input: &str) -> Self {
         match input {
-            "X" | "A" => Self::Rock,
-            "Y" | "B" => Self::Paper,
-            "Z" | "C" => Self::Scissors,
-            _ => unreachable!()
+            "A" => Self::Rock,
+            "B" => Self::Paper,
+            "C" => Self::Scissors,
+            _ => unreachable!(),
         }
     }
 
@@ -43,14 +46,24 @@ impl Shape {
         }
     }
 
-    fn check_if_beats(&self, input: &Shape) -> bool {
-        let weaker_shape = match self {
+    fn get_weaker_shape(&self) -> Self {
+        match self {
             Shape::Rock => Shape::Scissors,
             Shape::Paper => Shape::Rock,
-            Shape::Scissors => Shape::Paper, 
-        }; 
+            Shape::Scissors => Shape::Paper,
+        }
+    }
 
-        weaker_shape == *input
+    fn get_stronger_shape(&self) -> Self {
+        match self {
+            Shape::Rock => Shape::Paper,
+            Shape::Paper => Shape::Scissors,
+            Shape::Scissors => Shape::Rock,
+        }
+    }
+
+    fn check_if_beats(&self, input: &Shape) -> bool {
+        self.get_weaker_shape() == *input
     }
 }
 
@@ -63,15 +76,32 @@ struct Round {
 enum RoundResult {
     Win,
     Loss,
-    Draw
+    Draw,
 }
 
 impl RoundResult {
+    fn new(input: &str) -> Self {
+        match input {
+            "X" => RoundResult::Loss,
+            "Y" => RoundResult::Draw,
+            "Z" => RoundResult::Win,
+            _ => unreachable!(),
+        }
+    }
+
     fn get_points(&self) -> u8 {
         match self {
             RoundResult::Win => 6,
             RoundResult::Loss => 0,
             RoundResult::Draw => 3,
+        }
+    }
+
+    fn get_expected_shape(&self, op_shape: &Shape) -> Shape {
+        match self {
+            RoundResult::Win => op_shape.get_stronger_shape(),
+            RoundResult::Loss => op_shape.get_weaker_shape(),
+            RoundResult::Draw => op_shape.clone(),
         }
     }
 }
@@ -81,12 +111,9 @@ impl Round {
         let splitted = line.split_whitespace().collect::<Vec<&str>>();
 
         let opponent = Shape::new(splitted.first()?);
-        let me = Shape::new(splitted.last()?);
+        let me = RoundResult::new(splitted.last()?).get_expected_shape(&opponent);
 
-        Some(Self {
-            me,
-            opponent
-        })
+        Some(Self { me, opponent })
     }
 
     fn calculate(&self) -> usize {
@@ -104,10 +131,8 @@ impl Round {
             RoundResult::Win
         } else if opponent_wins {
             RoundResult::Loss
-        }
-        else {
-            RoundResult::Draw 
+        } else {
+            RoundResult::Draw
         }
     }
 }
-
