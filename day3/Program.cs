@@ -1,14 +1,19 @@
 ﻿var rucksacks = File.ReadAllLines("input");
 
 var totalPriority = 0;
-foreach (var rucksack in rucksacks)
+foreach (var group in rucksacks.Chunk(3))
 {
-	var firstCompartment = rucksack.Substring(0, rucksack.Length / 2);
-	var lastCompartment = rucksack.Substring(rucksack.Length / 2);
+	string accm = "";
+	foreach (var rucksack in group) {
+		if (string.IsNullOrEmpty(accm)) {
+			accm = rucksack;
+			continue;
+		}
 
-	var letters = firstCompartment.Intersect(lastCompartment);
+		accm = string.Join(string.Empty, accm.Intersect(rucksack));
+	}
 
-	totalPriority += letters.Select(l => GetPriority(l.ToString())).Sum();
+	totalPriority += accm.Select(l => GetPriority(l.ToString())).Sum();
 }
 
 Console.WriteLine("total: {0}", totalPriority);
