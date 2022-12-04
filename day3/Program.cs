@@ -10,16 +10,16 @@ foreach (var group in rucksacks.Chunk(3))
 			continue;
 		}
 
-		accm = string.Join(string.Empty, accm.Intersect(rucksack));
+		accm = string.Join("", accm.Intersect(rucksack));
 	}
 
-	totalPriority += accm.Select(l => GetPriority(l.ToString())).Sum();
+	totalPriority += accm.Select(GetPriority).Sum();
 }
 
 Console.WriteLine("total: {0}", totalPriority);
 
 
-int GetPriority(string letter)
+int GetPriority(char letter)
 {
 	var alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
