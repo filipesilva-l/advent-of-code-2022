@@ -37,9 +37,18 @@ fn get_range(section: &str) -> Result<Vec<u32>> {
 }
 
 fn overlaps(first: Vec<u32>, last: Vec<u32>) -> bool {
-    let first_overlaps_last = first.contains(&last.first().unwrap()) && first.contains(&last.last().unwrap());
-    let last_overlaps_first = last.contains(&first.first().unwrap()) && last.contains(&first.last().unwrap());
+    for el in &last {
+        if first.contains(&el) {
+            return true;
+        }
+    }
 
-    return first_overlaps_last || last_overlaps_first;
+    for el in first {
+        if last.contains(&el) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
