@@ -43,12 +43,15 @@ foreach (var line in lines) {
 
 	var crateFromCount = crateFrom.Count;
 
-	for (var i = 1; i <= quantity; i++) {
-		var index = crateFromCount - i;
-		var element = crateFrom[index];
+	var fixedIndex = crateFromCount - quantity;
+
+	while (quantity > 0) {
+		var element = crateFrom[fixedIndex];
 
 		crateTo.Add(element);
-		crateFrom.RemoveAt(index);
+		crateFrom.RemoveAt(fixedIndex);
+
+		quantity--;
 	}
 }
 
