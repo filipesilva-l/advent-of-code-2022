@@ -24,11 +24,20 @@ foreach (var line in lines)
     }
 }
 
-long smallTotal = 0;
+const long TotalSize = 70000000;
+const long TotalFreeSpaceNeeded = 30000000;
 
-var total = CalculateSize(rootDir);
+List<long> spacesThatCouldBeUsed = new();
+long unusedSpace = 0, neededSpace = 0;
 
-Console.WriteLine("total: {0}", smallTotal);
+var rootSize = CalculateSize(rootDir, false);
+
+unusedSpace = TotalSize - rootSize;
+neededSpace = TotalFreeSpaceNeeded - unusedSpace;
+
+CalculateSize(rootDir, true);
+
+Console.WriteLine(spacesThatCouldBeUsed.OrderBy(s => s).First());
 
 IOperation? GetOperation(string line)
 {
@@ -63,20 +72,20 @@ IObject GetOutputObject(string line, Directory parent)
     };
 }
 
-long CalculateSize(Directory dir)
+long CalculateSize(Directory dir, bool populateList)
 {
 	long total = 0;
 	foreach (var (_, item) in dir.Contents)
 	{
 		if (item is Directory subDir)
-			total += CalculateSize(subDir);
+			total += CalculateSize(subDir, populateList);
 
 		if (item is File file)
 			total += file.Size;
 	}
 
-	if (total < 100000)
-		smallTotal += total;
+	if (populateList && total > neededSpace)
+		spacesThatCouldBeUsed.Add(total);
 
 	return total;
 }
